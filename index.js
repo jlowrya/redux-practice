@@ -1,17 +1,10 @@
-function todos(state = [], action){
-  if(action.type === 'ADD_TODO'){
-    return state.concat([action.todo])
-  }
-
-  return state
-}
-
-function createStore(){
+//Library code
+function createStore(reducer){
   let state
   let listeners = []
 
   const dispatch = (action) => {
-    state = todos(state, action)
+    state = reducer(state, action)
     listeners.forEach((listener) => listener())
   }
 
@@ -30,3 +23,15 @@ function createStore(){
     dispatch
   }
 }
+
+
+//App code
+function todos(state = [], action){
+  if(action.type === 'ADD_TODO'){
+    return state.concat([action.todo])
+  }
+
+  return state
+}
+
+const store = createStore(todos)
