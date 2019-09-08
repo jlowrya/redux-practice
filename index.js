@@ -6,10 +6,14 @@ function todos(state = [], action){
   return state
 }
 
-
 function createStore(){
   let state
   let listeners = []
+
+  const dispatch = (action) => {
+    state = todos(state, action)
+    listeners.forEach((listener) => listener())
+  }
 
   const getState = () => state
 
@@ -21,6 +25,8 @@ function createStore(){
   }
 
   return {
-    getState
+    getState,
+    subscribe,
+    dispatch
   }
 }
