@@ -242,6 +242,10 @@ document.getElementById('goalBtn')
               <span>
                 {item.name}
               </span>
+              
+              <button onClick={() => props.remove(item)}>
+                X
+              </button>
             </li>
           ))}
         </ul>
@@ -261,6 +265,11 @@ document.getElementById('goalBtn')
         }))
       }
 
+      removeItem = (todo) => {
+        this.props.store.dispatch(removeTodoAction(todo.id))
+      }
+
+
       render(){
         return (
           <div>
@@ -272,7 +281,10 @@ document.getElementById('goalBtn')
             />
             <button onClick={this.addItem}>Add Todo</button>
 
-            <List items={ this.props.todos } />
+            <List 
+              items={ this.props.todos } 
+              remove={ this.removeItem }
+            />
           </div>
         )
       }
@@ -289,6 +301,11 @@ document.getElementById('goalBtn')
           name,
         }))
       }
+
+      removeItem = (goal) => {
+        console.log('remove goal')
+        this.props.store.dispatch(removeGoalAction(goal.id))
+      }
       
       render(){
         return (
@@ -301,7 +318,10 @@ document.getElementById('goalBtn')
             />
             <button onClick={this.addItem}>Add Goal</button>
 
-            <List items={ this.props.goals }/>
+            <List 
+              items={ this.props.goals }
+              remove={ this.removeItem }
+            />
           </div>
         )
       }
