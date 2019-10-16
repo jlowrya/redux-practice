@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
     <script src="https://tylermcginnis.com/goals-todos-api/index.js"></script>
+    <script src="https://unpkg.com/redux-thunk@2.2.0/dist/redux-thunk.min.js"></script>
 </head>
 <body>
     <div id="app">
@@ -74,6 +75,17 @@ function receiveDataAction (todos, goals) {
       todos: todos,
       goals: goals
     }
+}
+
+function handleDeleteTodo (todo) {
+  return (dispatch) => {
+  dispatch(removeTodoAction(todo.id))
+
+  return API.deleteTodo(todo.id).catch(() => {
+            dispatch(addTodoAction(todo))
+            alert('An error occurred. Try again.')
+          })
+  }
 }
 
 function todos(state = [], action){
@@ -160,7 +172,7 @@ const store = Redux.createStore(Redux.combineReducers({
   todos,
   goals,
   loading
-}), Redux.applyMiddleware(checker, logger, goalEncourager, taskReminder))
+}), Redux.applyMiddleware(ReduxThunk.default, checker, logger, goalEncourager, taskReminder))
 
   </script>
   <script type="text/babel">
@@ -188,22 +200,29 @@ const store = Redux.createStore(Redux.combineReducers({
     class Todos extends React.Component {
       addItem = (e) => {
         e.preventDefault()
-        const name = this.input.value
-        this.input.value =  ''
 
-        this.props.store.dispatch( addTodoAction({
-        name,
-        complete: false,
-        id: generateId(),
-        }))
+        return API.saveTodo(this.input.value)
+          .then((todo) => {
+            this.props.store.dispatch(addTodoAction(todo))
+            this.input.value = ''
+          })
+          .catch(() => {
+            alert('There was an error. Try again.')
+          })
       }
 
       removeItem = (todo) => {
-        this.props.store.dispatch(removeTodoAction(todo.id))
+        this.props.store.dispatch(handleDeleteTodo(todo))
       }
 
       toggleItem = (id) => {
         this.props.store.dispatch(toggleTodoAction(id))
+
+        return API.saveTodoToggle(id)
+          .catch(() =>{
+            this.props.store.dispatch(toggleTodoAction(id))
+            alert('An error occurred. Try again.')
+          })
       }
 
 
@@ -231,18 +250,21 @@ const store = Redux.createStore(Redux.combineReducers({
     class Goals extends React.Component {
       addItem = (e) => {
         e.preventDefault()
-        const name = this.input.value
-        this.input.value =  ''
-
-        this.props.store.dispatch( addGoalAction({
-          id: generateId(),
-          name,
-        }))
+        return API.saveGoal(this.input.value)
+          .then((goal) => {
+            this.props.store.dispatch(addGoalAction(goal))
+            this.input.value = ''
+          })
+          .catch(() => alert('There was an error. Try again.'))
       }
 
       removeItem = (goal) => {
-        console.log('remove goal')
         this.props.store.dispatch(removeGoalAction(goal.id))
+        return API.deleteGoal(goal.id)
+          .catch(() => {
+            this.props.store.dispatch(addGoalAction(goal))
+            alert('An error occurred. Try again.')
+          })
       }
       
       render(){
